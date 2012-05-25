@@ -1,0 +1,11 @@
+#!/usr/bin/env ruby
+
+# usage: start <server_path> <port> <ram_allocation>
+# runs the server
+
+server_path, port, ram = ARGV
+root = File.expand_path File.join __FILE__, '../..'
+
+exec %Q{
+  cd #{server_path} && java -Xmx#{ram}M -Xms#{ram}M -jar server.jar nogui 2>&1
+}

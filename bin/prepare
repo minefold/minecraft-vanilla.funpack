@@ -1,0 +1,26 @@
+#!/usr/bin/env ruby
+
+require 'json'
+require 'erb'
+
+root = File.expand_path File.join __FILE__, '../..'
+
+# usage: prepare <world_path> <settings_json_file>
+# prepares the world to run
+# before this runs, the world will be pulled down and stored at world_path
+
+world_path = File.expand_path(ARGV.shift)
+settings_json_file = ARGV.shift
+
+settings = settings_json_file ? JSON.parse(File.read(settings_json_file)) : {}
+
+servers = {
+  'HEAD' => 'https://s3.amazonaws.com/MinecraftDownload/launcher/minecraft_server.jar',
+  '12w21b' => 'http://assets.minecraft.net/12w21b/minecraft_server.jar'
+}
+
+server_url = servers[settings['minecraft-version']]
+
+abort 'Unknown version' unless server_url
+
+puts `curl --silent --show-error -RL #{server_url} -o '#{world_path}/server.jar'`
