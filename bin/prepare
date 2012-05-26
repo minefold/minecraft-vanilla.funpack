@@ -13,14 +13,15 @@ world_path = File.expand_path(ARGV.shift)
 settings_json_file = ARGV.shift
 
 settings = settings_json_file ? JSON.parse(File.read(settings_json_file)) : {}
+requested_version = settings['minecraft_version']
 
 servers = {
   'HEAD' => 'https://s3.amazonaws.com/MinecraftDownload/launcher/minecraft_server.jar',
   '12w21b' => 'http://assets.minecraft.net/12w21b/minecraft_server.jar'
 }
 
-server_url = servers[settings['minecraft_version']]
+server_url = servers[requested_version]
 
-abort 'Unknown version' unless server_url
+abort "Unknown version: #{requested_version}" unless server_url
 
 puts `curl --silent --show-error -RL #{server_url} -o '#{world_path}/server.jar'`
