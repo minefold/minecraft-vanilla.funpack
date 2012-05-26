@@ -12,7 +12,14 @@ root = File.expand_path File.join __FILE__, '../..'
 world_path = File.expand_path(ARGV.shift)
 settings_json_file = ARGV.shift
 
+puts "file: #{settings_json_file}"
+
+
 settings = settings_json_file ? JSON.parse(File.read(settings_json_file)) : {}
+
+puts "contents: #{File.read(settings_json_file)}"
+puts "settings: #{settings}"
+
 requested_version = settings['minecraft_version']
 
 servers = {
