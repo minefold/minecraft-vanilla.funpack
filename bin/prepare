@@ -19,7 +19,7 @@ servers = {
   '12w21b' => 'http://assets.minecraft.net/12w21b/minecraft_server.jar'
 }
 
-server_url = servers[settings['minecraft-version']]
+server_url = servers[settings['minecraft_version']]
 
 abort 'Unknown version' unless server_url
 
