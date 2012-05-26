@@ -16,5 +16,5 @@ Dir.chdir WORLD_DIR do
     end
   end
 
-  system "tar c #{level_paths.join(' ')} plugins ops.txt white-list.txt permissions.yml"
+  system "tar c #{level_paths.join(' ')}"
 end
