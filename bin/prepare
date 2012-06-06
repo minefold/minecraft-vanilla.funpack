@@ -4,7 +4,7 @@ require 'json'
 require 'erb'
 require 'find'
 
-root = File.expand_path File.join __FILE__, '../..'
+ROOT = File.expand_path File.join __FILE__, '../..'
 
 # usage: prepare <world_dir> <settings_json_file>
 # prepares the world to run
@@ -31,7 +31,7 @@ def settings json_file
 end
 
 def write_server_properties world_dir, level_name, options
-  template = ERB.new(File.read('template/server.properties.erb'))
+  template = ERB.new(File.read("#{ROOT}/template/server.properties.erb"))
   File.write "#{world_dir}/server.properties", template.result(binding)
 end
 
