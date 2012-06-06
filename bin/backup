@@ -1,20 +1,21 @@
 #!/usr/bin/env ruby
 
 # bin/backup <world-dir>
-# creates a tar stream of stuff to be backed up
+# outputs files to include in backup
 
 require 'find'
 
 WORLD_DIR = ARGV.shift
 raise "world dir does not exist: #{WORLD_DIR}" unless File.exists? WORLD_DIR
 
-Dir.chdir WORLD_DIR do
+level_paths = Dir.chdir WORLD_DIR do
   level_paths = []
   Find.find('.') do |path|
     if path =~ /\/level\.dat$/
-      level_paths << File.dirname(path)
+      level_paths << File.dirname(path).gsub(/^\.\//, '')
     end
   end
-
-  system "tar c #{level_paths.join(' ')}"
+  level_paths
 end
+
+puts "#{level_paths.join(' ')}"

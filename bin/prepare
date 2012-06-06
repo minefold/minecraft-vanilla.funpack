@@ -2,18 +2,48 @@
 
 require 'json'
 require 'erb'
+require 'find'
 
 root = File.expand_path File.join __FILE__, '../..'
 
-# usage: prepare <world_path> <settings_json_file>
+# usage: prepare <world_dir> <settings_json_file>
 # prepares the world to run
-# before this runs, the world will be pulled down and stored at world_path
+# before this runs, the world will be pulled down and stored at world_dir
 
-world_path = File.expand_path(ARGV.shift)
+def level_paths world_dir
+  Dir.chdir world_dir do
+    level_paths = []
+    Find.find('.') do |path|
+      if path =~ /\/level\.dat$/
+        level_paths << File.dirname(path).gsub(/^\.\//, '')
+      end
+    end
+    level_paths
+  end
+end
+
+def level_path world_dir
+  level_paths(world_dir).min
+end
+
+def settings json_file
+  json_file ? JSON.parse(File.read(json_file)) : {}
+end
+
+def write_server_properties world_dir, level_name, options
+  template = ERB.new(File.read('template/server.properties.erb'))
+  File.write "#{world_dir}/server.properties", template.result(binding)
+end
+
+def download_server_jar url, world_dir
+  puts `curl --silent --show-error -RL #{url} -o '#{world_dir}/server.jar'`
+end
+
+# args
+world_dir = File.expand_path(ARGV.shift)
 settings_json_file = ARGV.shift
 
-settings = settings_json_file ? JSON.parse(File.read(settings_json_file)) : {}
-
+settings = settings(settings_json_file)
 requested_version = settings['options']['minecraft_version']
 
 servers = {
@@ -25,4 +55,6 @@ server_url = servers[requested_version]
 
 abort "Unknown version: #{requested_version}" unless server_url
 
-puts `curl --silent --show-error -RL #{server_url} -o '#{world_path}/server.jar'`
+download_server_jar server_url, world_dir
+
+write_server_properties world_dir, level_path(world_dir), settings

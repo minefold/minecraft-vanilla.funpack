@@ -9,7 +9,9 @@ task :test do
 
   File.write 'tmp/world/settings.json', <<-EOS
 {
-  "minecraft-version" : "12w21b"
+  "options" : {
+    "minecraft_version" : "HEAD"
+  }
 }
   EOS
 
