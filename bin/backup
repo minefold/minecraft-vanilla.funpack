@@ -12,7 +12,7 @@ level_paths = Dir.chdir WORLD_DIR do
   level_paths = []
   Find.find('.') do |path|
     if path =~ /\/level\.dat$/
-      level_paths << File.dirname(path).gsub(/^\.\//, '')
+      level_paths << File.dirname(path)
     end
   end
   level_paths
