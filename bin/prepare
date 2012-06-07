@@ -35,10 +35,6 @@ def write_server_properties world_dir, level_name, options
   File.write "#{world_dir}/server.properties", template.result(binding)
 end
 
-def write_ops_file world_dir, options
-  File.write "#{world_path}/ops.txt", (options['ops'] || []).join("\n")
-end
-
 def download_server_jar url, world_dir
   puts `curl --silent --show-error -RL #{url} -o '#{world_dir}/server.jar'`
 end

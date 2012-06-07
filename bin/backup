@@ -18,4 +18,4 @@ level_paths = Dir.chdir WORLD_DIR do
   level_paths
 end
 
-puts "#{level_paths.join(' ')} ops.txt server.properties white-list.txt banned-players.txt"
+puts "#{level_paths.join(' ')} ./ops.txt ./server.properties ./white-list.txt ./banned-players.txt"
