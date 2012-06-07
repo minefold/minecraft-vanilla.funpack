@@ -10,7 +10,11 @@ task :test do
   File.write 'tmp/world/settings.json', <<-EOS
 {
   "options" : {
-    "minecraft_version" : "HEAD"
+    "name": "minecraft-vanilla",
+    "minecraft_version": "HEAD",
+    "ops": ["chrislloyd"],
+    "whitelisted": ["whatupdave"],
+    "banned": ["atnan"]
   }
 }
   EOS

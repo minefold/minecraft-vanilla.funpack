@@ -35,6 +35,10 @@ def write_server_properties world_dir, level_name, options
   File.write "#{world_dir}/server.properties", template.result(binding)
 end
 
+def write_ops_file world_dir, options
+  File.write "#{world_path}/ops.txt", (options['ops'] || []).join("\n")
+end
+
 def download_server_jar url, world_dir
   puts `curl --silent --show-error -RL #{url} -o '#{world_dir}/server.jar'`
 end
@@ -44,7 +48,8 @@ world_dir = File.expand_path(ARGV.shift)
 settings_json_file = ARGV.shift
 
 settings = settings(settings_json_file)
-requested_version = settings['options']['minecraft_version']
+pack_settings = settings['options']
+requested_version = pack_settings['minecraft_version']
 
 servers = {
   'HEAD' => 'https://s3.amazonaws.com/MinecraftDownload/launcher/minecraft_server.jar',
@@ -58,3 +63,7 @@ abort "Unknown version: #{requested_version}" unless server_url
 download_server_jar server_url, world_dir
 
 write_server_properties world_dir, level_path(world_dir), settings
+
+File.write "#{world_dir}/ops.txt", pack_settings['ops'].join("\n")
+File.write "#{world_dir}/white-list.txt", pack_settings['whitelisted'].join("\n")
+File.write "#{world_dir}/banned-players.txt", pack_settings['banned'].join("\n")
