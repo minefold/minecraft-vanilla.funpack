@@ -14,7 +14,11 @@ task :test do
     "minecraft_version": "HEAD",
     "ops": ["chrislloyd"],
     "whitelisted": ["whatupdave"],
-    "banned": ["atnan"]
+    "banned": ["atnan"],
+    "seed": 123456789,
+    "spawn_animals": true,
+    "spawn_monsters": true,
+    "game_mode": 1
   }
 }
   EOS

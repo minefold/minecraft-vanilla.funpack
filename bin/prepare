@@ -58,7 +58,7 @@ abort "Unknown version: #{requested_version}" unless server_url
 
 download_server_jar server_url, world_dir
 
-write_server_properties world_dir, level_path(world_dir), settings
+write_server_properties world_dir, level_path(world_dir), pack_settings
 
 File.write "#{world_dir}/ops.txt", pack_settings['ops'].join("\n")
 File.write "#{world_dir}/white-list.txt", pack_settings['whitelisted'].join("\n")
