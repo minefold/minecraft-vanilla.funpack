@@ -49,7 +49,7 @@ requested_version = pack_settings['minecraft_version']
 
 servers = {
   'HEAD' => 'https://s3.amazonaws.com/MinecraftDownload/launcher/minecraft_server.jar',
-  '12w21b' => 'http://assets.minecraft.net/12w21b/minecraft_server.jar'
+  '12w21b' => 'http://assets.minecraft.net/12w21b/minecraft_server.jar',
   '12w23b' => 'http://assets.minecraft.net/12w23b/minecraft_server.jar'
 }
 
