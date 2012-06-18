@@ -45,7 +45,7 @@ settings_json_file = ARGV.shift
 
 settings = settings(settings_json_file)
 pack_settings = settings['options']
-requested_version = pack_settings['minecraft_version']
+requested_version = pack_settings['minecraft_version'] || 'HEAD'
 
 servers = {
   'HEAD' => 'https://s3.amazonaws.com/MinecraftDownload/launcher/minecraft_server.jar',
