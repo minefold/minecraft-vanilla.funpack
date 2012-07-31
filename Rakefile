@@ -11,9 +11,9 @@ task :test do
 {
   "options" : {
     "name": "minecraft-vanilla",
-    "minecraft_version": "HEAD",
-    "ops": ["chrislloyd"],
-    "whitelisted": ["whatupdave"],
+    "minecraft_version": "1.3.1",
+    "ops": ["whatupdave"],
+    "whitelisted": ["minefold_guest"],
     "banned": ["atnan"],
     "seed": 123456789,
     "spawn_animals": true,
