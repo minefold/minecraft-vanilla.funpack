@@ -16,7 +16,7 @@ task :test do
 {
   "options" : {
     "name": "minecraft-vanilla",
-    "minecraft_version": "1.3.1",
+    "minecraft_version": "1.4-pre",
     "ops": ["whatupdave"],
     "whitelisted": ["minefold_guest"],
     "banned": ["atnan"],
