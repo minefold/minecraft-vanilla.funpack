@@ -15,7 +15,7 @@ motd=Minefold
 online-mode=true
 pvp=<%= options['pvp'] || 'true' %>
 server-ip=0.0.0.0
-server-port=25565
+server-port=<%= @port || 25565 %>
 spawn-animals=<%= options['spawn_animals'] || 'false' %>
 spawn-monsters=<%= options['spawn_monsters'] || 'false' %>
 spawn-npcs=true

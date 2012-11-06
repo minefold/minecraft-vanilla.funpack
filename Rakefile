@@ -12,24 +12,31 @@ task :test do
     cp -R #{world}/* tmp/world
   }
 
-  File.write 'tmp/world/settings.json', <<-EOS
-{
-  "options" : {
-    "name": "minecraft-vanilla",
-    "minecraft_version": "HEAD",
-    "ops": ["whatupdave"],
-    "whitelisted": ["minefold_guest"],
-    "banned": ["atnan"],
-    "seed": 123456789,
-    "spawn_animals": true,
-    "spawn_monsters": true,
-    "game_mode": 1
+  File.write 'tmp/settings.json', <<-EOS
+  {
+    "port": 4032,
+    "ram": {
+      "min": 1024,
+      "max": 1024
+    },
+    "settings" : {
+      "banned": ["atnan"],
+      "game_mode": 1,
+      "new_player_can_build" : false,
+      "ops": ["chrislloyd"],
+      "seed": 123456789,
+      "spawn_animals": true,
+      "spawn_monsters": true,
+      "whitelisted": ["whatupdave"]
+    }
   }
-}
   EOS
 
-  system "bin/prepare tmp/world tmp/world/settings.json"
-  system "bin/start tmp/world 4032 1024"
+  run = File.expand_path 'bin/run'
+
+  Dir.chdir('tmp/world') do
+    raise "error" unless system "#{run} ../settings.json"
+  end
 end
 
 task :download do

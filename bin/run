@@ -1,0 +1,19 @@
+#!/usr/bin/env ruby
+
+# usage: run <server-json>
+# runs the server
+
+require 'json'
+
+server_json = ARGV.first
+bin = File.expand_path File.join(__FILE__, '..')
+
+server_settings = JSON.parse(File.read(server_json))
+system "#{bin}/prepare #{server_json}"
+
+ram_min, ram_max = server_settings['ram']['min'], server_settings['ram']['max']
+
+cmd = %Q{
+  java -Xms#{ram_min}M -Xmx#{ram_max}M -jar server.jar nogui 2>&1 | #{bin}/transform
+}
+exec cmd

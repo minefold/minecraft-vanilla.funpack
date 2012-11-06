@@ -6,9 +6,8 @@ require 'find'
 
 ROOT = File.expand_path File.join __FILE__, '../..'
 
-# usage: prepare <world_dir> <settings_json_file>
+# usage: prepare <settings_json_file>
 # prepares the world to run
-# before this runs, the world will be pulled down and stored at world_dir
 
 def level_paths world_dir
   Dir.chdir world_dir do
@@ -36,15 +35,15 @@ def write_server_properties world_dir, level_name, options
 end
 
 def download_server_jar url, world_dir
-  puts `curl --silent --show-error -RL #{url} -o '#{world_dir}/server.jar'`
+  `curl --silent --show-error -RL #{url} -o '#{world_dir}/server.jar'`
 end
 
 # args
-world_dir = File.expand_path(ARGV.shift)
 settings_json_file = ARGV.shift
 
 settings = settings(settings_json_file)
-pack_settings = settings['options']
+@port = settings['port']
+pack_settings = settings['settings']
 requested_version = pack_settings['minecraft_version'] || 'HEAD'
 
 servers = {
@@ -60,10 +59,10 @@ server_url = servers[requested_version]
 
 abort "Unknown version: #{requested_version}" unless server_url
 
-download_server_jar server_url, world_dir
+download_server_jar server_url, '.'
 
-write_server_properties world_dir, level_path(world_dir) || 'level', pack_settings
+write_server_properties '.', level_path('.') || 'level', pack_settings
 
-File.write "#{world_dir}/ops.txt", pack_settings['ops'].join("\n")
-File.write "#{world_dir}/white-list.txt", pack_settings['whitelisted'].join("\n")
-File.write "#{world_dir}/banned-players.txt", pack_settings['banned'].join("\n")
+File.write "ops.txt", (pack_settings['ops'] || []).join("\n")
+File.write "white-list.txt", (pack_settings['whitelisted']||[]).join("\n")
+File.write "banned-players.txt", (pack_settings['banned']||[]).join("\n")
