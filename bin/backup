@@ -14,4 +14,4 @@ end
 
 raise "level.dat not found" unless level_paths.any?
 
-exec %Q{tar c #{level_paths.join(' ')} ./ops.txt ./server.properties ./white-list.txt ./banned-players.txt}
+puts "#{level_paths.join(' ')} ./ops.txt ./server.properties ./white-list.txt ./banned-players.txt"
