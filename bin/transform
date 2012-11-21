@@ -64,6 +64,7 @@ ARGF.each_line do |line|
 
   case
   when line.include?('Done (')
+    sleep 2
     event 'started'
 
   when line == 'Stopping server'
