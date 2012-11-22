@@ -76,6 +76,9 @@ ARGF.each_line do |line|
   when line =~ /^(\w+) lost connection: (.*)$/
     event 'player_disconnected', playername: $1, reason: $2
 
+  when line.include?('FAILED TO BIND TO PORT!')
+    event 'fatal_error'
+
   else
     event 'info', msg: line.strip
   end
