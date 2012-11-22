@@ -56,8 +56,6 @@ class LogProcessor
 
     case
     when line.include?('Done (')
-      # Minecraft currently reports Done too early, so we sleep
-      sleep 5
       event 'started'
 
     when line == 'Stopping server'
