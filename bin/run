@@ -1,11 +1,17 @@
 #!/usr/bin/env ruby
+# encoding: ISO-8859-1
 
 # usage: run <server-json>
 # runs the server
 
+require 'time'
 require 'json'
 
+STDOUT.sync = true
+STDIN.sync = true
+
 server_json = ARGV.first
+HUMAN_FRIENDLY = ARGV.include? "-h"
 bin = File.expand_path File.join(__FILE__, '..')
 
 server_settings = JSON.parse(File.read(server_json))
@@ -13,7 +19,94 @@ system "#{bin}/prepare #{server_json}"
 
 ram_min, ram_max = server_settings['ram']['min'], server_settings['ram']['max']
 
-cmd = %Q{
-  java -Xms#{ram_min}M -Xmx#{ram_max}M -jar server.jar nogui 2>&1 | #{bin}/transform
-}
-exec cmd
+# Events:
+# started
+# stopping
+# player_connected      { playername: '..' }
+# player_disconnected
+# chatted
+# opped
+# deopped
+# whitelist_added
+# whitelist_removed
+# banned
+# pardoned
+# info
+# warning
+# critical
+
+
+class LogProcessor
+  LINES = {
+    :opped => [/(\w+): Opping (\w+)/, '\1 issued server command: op \2'],
+    :deopped => [/(\w+): De-opping (\w+)/, '\1 issued server command: deop \2'],
+    :whitelist_added => [/(\w+): Added (\w+) to white-list/, '\1 issued server command: whitelist add \2'],
+    :whitelist_removed => [/(\w+): Removed (\w+) from white-list/, '\1 issued server command: whitelist remove \2'],
+  }
+
+  def initialize pid
+    @pid = pid
+  end
+
+  def process_line line
+    line = line.force_encoding('ISO-8859-1').
+              gsub(/\e\[\d+m/, ''). # strip color sequences out
+              gsub(/[\d-]+ [\d:]+ \[[A-Z]+\]\s/, '').strip  # strip message prefix
+    # line =~ /(\d{2}:\d{2}:\d{2})\s\[(\w+)\]\s+(.*)/
+
+    case
+    when line.include?('Done (')
+      # Minecraft currently reports Done too early, so we sleep
+      sleep 5
+      event 'started'
+
+    when line == 'Stopping server'
+      event 'stopping'
+
+    when line =~ /^(\w+).*logged in with entity id/
+      event 'player_connected', playername: $1
+
+    when line =~ /^(\w+) lost connection: (.*)$/
+      event 'player_disconnected', playername: $1, reason: $2
+
+    when line.include?('FAILED TO BIND TO PORT!')
+      event 'fatal_error'
+      Process.kill :TERM, @pid
+
+    else
+      event 'info', msg: line.strip
+    end
+  end
+
+  def readable type, options={}
+    "#{Time.now.utc.strftime('%Y-%b-%d %H:%M:%S')} [#{type}] " +
+      options.map{|k,v| "#{k}=#{v.include?(' ') ? ("\"" + v + "\"") : v}"}.join(' ')
+  end
+
+  def json type, options={}
+    args = {ts: Time.now.utc.iso8601, event: type, pid: @pid }.merge(options)
+    JSON.dump(args)
+  end
+
+  def event type, options = {}
+    line = if HUMAN_FRIENDLY
+      readable type, options
+    else
+      json type, options
+    end
+    puts line
+  end
+end
+
+IO.popen(["java",
+            "-Xms#{ram_min}M", "-Xmx#{ram_max}M",
+            "-jar", "server.jar",
+            "nogui", :err => [:child, :out]]) do |io|
+  begin
+    processor = LogProcessor.new(io.pid)
+    while true
+      processor.process_line io.readline
+    end
+  rescue EOFError
+  end
+end
