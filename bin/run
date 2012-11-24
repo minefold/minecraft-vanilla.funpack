@@ -35,7 +35,6 @@ ram_min, ram_max = server_settings['ram']['min'], server_settings['ram']['max']
 # warning
 # critical
 
-
 class LogProcessor
   LINES = {
     :opped => [/(\w+): Opping (\w+)/, '\1 issued server command: op \2'],
@@ -46,6 +45,7 @@ class LogProcessor
 
   def initialize pid
     @pid = pid
+    @listing = false
   end
 
   def process_line line
@@ -54,25 +54,42 @@ class LogProcessor
               gsub(/[\d-]+ [\d:]+ \[[A-Z]+\]\s/, '').strip  # strip message prefix
     # line =~ /(\d{2}:\d{2}:\d{2})\s\[(\w+)\]\s+(.*)/
 
-    case
-    when line.include?('Done (')
-      event 'started'
-
-    when line == 'Stopping server'
-      event 'stopping'
-
-    when line =~ /^(\w+).*logged in with entity id/
-      event 'player_connected', playername: $1
-
-    when line =~ /^(\w+) lost connection: (.*)$/
-      event 'player_disconnected', playername: $1, reason: $2
-
-    when line.include?('FAILED TO BIND TO PORT!')
-      event 'fatal_error'
-      Process.kill :TERM, @pid
-
+    if @listing
+      players_listing(line)
     else
-      event 'info', msg: line.strip
+      case
+      when line.include?('Done (')
+        event 'started'
+
+      when line == 'Stopping server'
+        event 'stopping'
+
+      when line =~ /^(\w+).*logged in with entity id/
+        event 'player_connected', playername: $1
+
+      when line =~ /^(\w+) lost connection: (.*)$/
+        event 'player_disconnected', playername: $1, reason: $2
+
+      when line =~ /^There are (\d+)\/(\d+) players online:$/
+        @listing = true
+        @online = $1.to_i
+        @players = []
+
+      when line.include?('FAILED TO BIND TO PORT!')
+        event 'fatal_error'
+        Process.kill :TERM, @pid
+
+      else
+        event 'info', msg: line.strip
+      end
+    end
+  end
+
+  def players_listing(line)
+    @players += line.split(',').map(&:strip)
+    if @players.size == @online
+      @listing = false
+      event 'players_list', usernames: @players
     end
   end
 
