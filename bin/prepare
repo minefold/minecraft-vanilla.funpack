@@ -64,5 +64,5 @@ download_server_jar server_url, '.'
 write_server_properties '.', level_path('.') || 'level', pack_settings
 
 File.write "ops.txt", pack_settings['ops'] || ""
-File.write "white-list.txt", pack_settings['whitelisted'] || ""
-File.write "banned-players.txt", pack_settings['banned'] || ""
+File.write "white-list.txt", pack_settings['whitelist'] || ""
+File.write "banned-players.txt", pack_settings['blacklist'] || ""

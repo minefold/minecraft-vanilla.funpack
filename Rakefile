@@ -5,7 +5,7 @@ task :test do
   if ENV['WORLD']
     world = "tmp/#{ENV['WORLD']}"
   end
-  
+
   system %Q{
     rm -rf tmp/world
     mkdir -p tmp/world
@@ -20,14 +20,14 @@ task :test do
       "max": 1024
     },
     "settings" : {
-      "banned": ["atnan"],
+      "blacklist": "atnan",
       "game_mode": 1,
       "new_player_can_build" : false,
-      "ops": ["chrislloyd"],
+      "ops": "chrislloyd\\nwhatupdave",
       "seed": 123456789,
       "spawn_animals": true,
       "spawn_monsters": true,
-      "whitelisted": ["whatupdave"]
+      "whitelist": "whatupdave"
     }
   }
   EOS

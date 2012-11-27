@@ -22,7 +22,7 @@ ram_min, ram_max = server_settings['ram']['min'], server_settings['ram']['max']
 # Events:
 # started
 # stopping
-# player_connected      { playername: '..' }
+# player_connected      { username: '..' }
 # player_disconnected
 # chatted
 # opped
@@ -65,15 +65,18 @@ class LogProcessor
         event 'stopping'
 
       when line =~ /^(\w+).*logged in with entity id/
-        event 'player_connected', playername: $1
+        event 'player_connected', username: $1
 
       when line =~ /^(\w+) lost connection: (.*)$/
-        event 'player_disconnected', playername: $1, reason: $2
+        event 'player_disconnected', username: $1, reason: $2
 
       when line =~ /^There are (\d+)\/(\d+) players online:$/
         @listing = true
         @online = $1.to_i
         @players = []
+
+      when line =~ /^\[(\w+)\: (.*)\]$/
+        process_setting_changed $1, $2
 
       when line.include?('FAILED TO BIND TO PORT!')
         event 'fatal_error'
@@ -81,6 +84,43 @@ class LogProcessor
 
       else
         event 'info', msg: line.strip
+      end
+    end
+
+    def settings_changed actor, key, value
+      event 'settings_changed',
+        actor: actor,
+          key: key,
+          value: value
+    end
+
+    def process_setting_changed actor, message
+      case
+      when message =~ /Added (\w+) to the whitelist/
+        settings_changed actor, 'whitelist_add', $1
+
+      when message =~ /Removed (\w+) from the whitelist/
+        settings_changed actor, 'whitelist_remove', $1
+
+      when message =~ /Banned player (\w+)/
+        settings_changed actor, 'blacklist_add', $1
+
+      when message =~ /Unbanned player (\w+)/
+        settings_changed actor, 'blacklist_remove', $1
+
+      when message =~ /Opped (\w+)/
+        settings_changed actor, 'ops_add', $1
+
+      when message =~ /De-opped (\w+)/
+        settings_changed actor, 'ops_remove', $1
+
+      when message =~ /default game mode is now (\w+)/
+        modes = %w(Survival Creative Adventure)
+        settings_changed actor, 'game_mode', modes.index($1)
+
+      when message =~ /Set game difficulty to (\w+)/
+        modes = %w(Peaceful Easy Normal Hard)
+        settings_changed actor, 'difficulty', modes.index($1)
       end
     end
   end
