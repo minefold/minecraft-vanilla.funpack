@@ -91,7 +91,7 @@ class LogProcessor
       event 'settings_changed',
         actor: actor,
           key: key,
-          value: value
+          value: value.to_s
     end
 
     def process_setting_changed actor, message
