@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 
 # bin/backup
-# outputs tar stream of backup
 
 require 'find'
 

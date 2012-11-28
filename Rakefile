@@ -27,7 +27,7 @@ task :test do
       "seed": 123456789,
       "spawn_animals": true,
       "spawn_monsters": true,
-      "whitelist": "whatupdave"
+      "whitelist": "chrislloyd\\nwhatupdave"
     }
   }
   EOS

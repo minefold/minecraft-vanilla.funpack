@@ -36,13 +36,6 @@ ram_min, ram_max = server_settings['ram']['min'], server_settings['ram']['max']
 # critical
 
 class LogProcessor
-  LINES = {
-    :opped => [/(\w+): Opping (\w+)/, '\1 issued server command: op \2'],
-    :deopped => [/(\w+): De-opping (\w+)/, '\1 issued server command: deop \2'],
-    :whitelist_added => [/(\w+): Added (\w+) to white-list/, '\1 issued server command: whitelist add \2'],
-    :whitelist_removed => [/(\w+): Removed (\w+) from white-list/, '\1 issued server command: whitelist remove \2'],
-  }
-
   def initialize pid
     @pid = pid
     @listing = false
