@@ -1,167 +1,38 @@
 #!/usr/bin/env ruby
-# encoding: ISO-8859-1
-
-# usage: run <server-json>
-# runs the server
-
 require 'time'
 require 'json'
+
+$LOAD_PATH << File.expand_path('../../lib', __FILE__)
+
+require 'log_transformer'
+
+
+# ---
+
 
 STDOUT.sync = true
 STDIN.sync = true
 
-server_json = ARGV.first
-HUMAN_FRIENDLY = ARGV.include? "-h"
-bin = File.expand_path File.join(__FILE__, '..')
+# usage: ./run <config>
 
-server_settings = JSON.parse(File.read(server_json))
-system "#{bin}/prepare #{server_json}"
+config_path = ARGV.first
+root = File.expand_path('../..', __FILE__)
 
-ram_min, ram_max = server_settings['ram']['min'], server_settings['ram']['max']
+# TODO This is a hack while Pinky doesn't support preparing funpacks.
+system(File.join(root, 'bin', 'prepare'), config_path)
 
-# Events:
-# started
-# stopping
-# player_connected      { username: '..' }
-# player_disconnected
-# chatted
-# opped
-# deopped
-# whitelist_added
-# whitelist_removed
-# banned
-# pardoned
-# info
-# warning
-# critical
+config = JSON.parse(File.read(config_path))
 
-class LogProcessor
-  LINES = {
-    :opped => [/(\w+): Opping (\w+)/, '\1 issued server command: op \2'],
-    :deopped => [/(\w+): De-opping (\w+)/, '\1 issued server command: deop \2'],
-    :whitelist_added => [/(\w+): Added (\w+) to white-list/, '\1 issued server command: whitelist add \2'],
-    :whitelist_removed => [/(\w+): Removed (\w+) from white-list/, '\1 issued server command: whitelist remove \2'],
-  }
+ram_min = config['ram']['min']
+ram_max = config['ram']['max']
 
-  def initialize pid
-    @pid = pid
-    @listing = false
-  end
+cmd = [ "java",
+        "-Xms#{ram_min}M",
+        "-Xmx#{ram_max}M",
+        "-jar", "server.jar",
+        "nogui",
+        err: [:child, :out]]
 
-  def process_line line
-    line = line.force_encoding('ISO-8859-1').
-              gsub(/\e\[\d+m/, ''). # strip color sequences out
-              gsub(/[\d-]+ [\d:]+ \[[A-Z]+\]\s/, '').strip  # strip message prefix
-    # line =~ /(\d{2}:\d{2}:\d{2})\s\[(\w+)\]\s+(.*)/
-
-    if @listing
-      players_listing(line)
-    else
-      case
-      when line.include?('Done (')
-        event 'started'
-
-      when line == 'Stopping server'
-        event 'stopping'
-
-      when line =~ /^(\w+).*logged in with entity id/
-        event 'player_connected', username: $1
-
-      when line =~ /^(\w+) lost connection: (.*)$/
-        event 'player_disconnected', username: $1, reason: $2
-
-      when line =~ /^There are (\d+)\/(\d+) players online:$/
-        @listing = true
-        @online = $1.to_i
-        @players = []
-
-      when line =~ /^\[(\w+)\: (.*)\]$/
-        process_setting_changed $1, $2
-
-      when line.include?('FAILED TO BIND TO PORT!')
-        event 'fatal_error'
-        Process.kill :TERM, @pid
-
-      else
-        event 'info', msg: line.strip
-      end
-    end
-
-    def settings_changed actor, key, value
-      event 'settings_changed',
-        actor: actor,
-          key: key,
-          value: value.to_s
-    end
-
-    def process_setting_changed actor, message
-      case
-      when message =~ /Added (\w+) to the whitelist/
-        settings_changed actor, 'whitelist_add', $1
-
-      when message =~ /Removed (\w+) from the whitelist/
-        settings_changed actor, 'whitelist_remove', $1
-
-      when message =~ /Banned player (\w+)/
-        settings_changed actor, 'blacklist_add', $1
-
-      when message =~ /Unbanned player (\w+)/
-        settings_changed actor, 'blacklist_remove', $1
-
-      when message =~ /Opped (\w+)/
-        settings_changed actor, 'ops_add', $1
-
-      when message =~ /De-opped (\w+)/
-        settings_changed actor, 'ops_remove', $1
-
-      when message =~ /default game mode is now (\w+)/
-        modes = %w(Survival Creative Adventure)
-        settings_changed actor, 'game_mode', modes.index($1)
-
-      when message =~ /Set game difficulty to (\w+)/
-        modes = %w(Peaceful Easy Normal Hard)
-        settings_changed actor, 'difficulty', modes.index($1)
-      end
-    end
-  end
-
-  def players_listing(line)
-    @players += line.split(',').map(&:strip)
-    if @players.size == @online
-      @listing = false
-      event 'players_list', usernames: @players
-    end
-  end
-
-  def readable type, options={}
-    "#{Time.now.utc.strftime('%Y-%b-%d %H:%M:%S')} [#{type}] " +
-      options.map{|k,v| "#{k}=#{v.include?(' ') ? ("\"" + v + "\"") : v}"}.join(' ')
-  end
-
-  def json type, options={}
-    args = {ts: Time.now.utc.iso8601, event: type, pid: @pid }.merge(options)
-    JSON.dump(args)
-  end
-
-  def event type, options = {}
-    line = if HUMAN_FRIENDLY
-      readable type, options
-    else
-      json type, options
-    end
-    puts line
-  end
-end
-
-IO.popen(["java",
-            "-Xms#{ram_min}M", "-Xmx#{ram_max}M",
-            "-jar", "server.jar",
-            "nogui", :err => [:child, :out]]) do |io|
-  begin
-    processor = LogProcessor.new(io.pid)
-    while true
-      processor.process_line io.readline
-    end
-  rescue EOFError
-  end
+IO.popen(cmd) do |io|
+  LogTransformer.new(io).process!
 end

@@ -1,68 +1,80 @@
 #!/usr/bin/env ruby
-
 require 'json'
 require 'erb'
 require 'find'
 
-ROOT = File.expand_path File.join __FILE__, '../..'
+$LOAD_PATH << File.expand_path('../../lib', __FILE__)
 
-# usage: prepare <settings_json_file>
+require 'template_context'
+
+# usage: ./prepare <config>
 # prepares the world to run
 
-def level_paths world_dir
-  Dir.chdir world_dir do
-    level_paths = []
-    Find.find('.') do |path|
-      if path =~ /\/level\.dat$/
-        level_paths << File.dirname(path).gsub(/^\.\//, '')
-      end
-    end
-    level_paths
-  end
-end
-
-def level_path world_dir
-  level_paths(world_dir).min
-end
-
-def settings json_file
-  json_file ? JSON.parse(File.read(json_file)) : {}
-end
-
-def write_server_properties world_dir, level_name, options
-  template = ERB.new(File.read("#{ROOT}/template/server.properties.erb"))
-  File.write "#{world_dir}/server.properties", template.result(binding)
-end
-
-def download_server_jar url, world_dir
-  `curl --silent --show-error -RL #{url} -o '#{world_dir}/server.jar'`
-end
-
-# args
-settings_json_file = ARGV.shift
-
-settings = settings(settings_json_file)
-@port = settings['port']
-pack_settings = settings['settings']
-requested_version = pack_settings['minecraft_version'] || 'HEAD'
-
-servers = {
-  'HEAD' => 'https://s3.amazonaws.com/MinecraftDownload/launcher/minecraft_server.jar',
-  '1.3.1' => 'http://assets.minecraft.net/1_3_1/minecraft_server.jar',
-  '12w21b' => 'http://assets.minecraft.net/12w21b/minecraft_server.jar',
-  '12w23b' => 'http://assets.minecraft.net/12w23b/minecraft_server.jar',
-  '12w38b' => 'http://assets.minecraft.net/12w38b/minecraft_server.jar',
+BINARIES = {
+  'HEAD'    => 'https://s3.amazonaws.com/MinecraftDownload/launcher/minecraft_server.jar',
+  '1.3.1'   => 'http://assets.minecraft.net/1_3_1/minecraft_server.jar',
+  '12w21b'  => 'http://assets.minecraft.net/12w21b/minecraft_server.jar',
+  '12w23b'  => 'http://assets.minecraft.net/12w23b/minecraft_server.jar',
+  '12w38b'  => 'http://assets.minecraft.net/12w38b/minecraft_server.jar',
   '1.4-pre' => 'http://assets.minecraft.net/1_4_1/minecraft_server.jar'
 }
 
-server_url = servers[requested_version]
+root = File.expand_path('../..', __FILE__)
 
-abort "Unknown version: #{requested_version}" unless server_url
+# Extract config
 
-download_server_jar server_url, '.'
+config_path = ARGV.shift
 
-write_server_properties '.', level_path('.') || 'level', pack_settings
+if File.exist?(config_path)
+  config = JSON.parse(File.read(config_path))
+else
+  abort "#{config_path} doesn't exist"
+end
 
-File.write "ops.txt", pack_settings['ops'] || ""
-File.write "white-list.txt", pack_settings['whitelist'] || ""
-File.write "banned-players.txt", pack_settings['blacklist'] || ""
+
+# Download binary from Mojang
+
+version = config['version'] || 'HEAD'
+
+if BINARIES.has_key?(version)
+  binary_url = BINARIES[version]
+else
+  abort "Unknown version #{version}"
+end
+
+system 'curl', '--silent', '--show-error', '-RL', binary_url, '-o', './server.jar'
+
+
+# Write server.properties
+
+level_name = Find.find('.').inject([]) do |paths, path|
+  if File.basename(path) == 'level.dat'
+    paths << File.basename(File.dirname(path))
+  end
+  paths
+end.min
+
+context = TemplateContext.new(config['settings'], level_name, config['port'])
+
+template = ERB.new(
+  File.read(File.join(root, 'templates', 'server.properties.erb'))
+)
+
+File.open('server.properties', 'w') do |f|
+  f.puts template.result(context.context)
+end
+
+
+# Write player lists
+
+File.open('white-list.txt', 'w') do |f|
+  f.puts config['settings']['whitelist']
+end
+
+File.open('ops.txt', 'w') do |f|
+  f.puts config['settings']['ops']
+end
+
+File.open('banned-players.txt', 'w') do |f|
+  f.puts config['settings']['banned']
+end
