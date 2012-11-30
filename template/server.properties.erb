@@ -1,9 +1,9 @@
-allow-nether=true
+allow-nether=<%= options['allow_nether'] == '1' || options['allow_nether'] == true  ? 'true' : 'false' %>
 allow-flight=false
 difficulty=<%= options['difficulty'] || 1 %>
 enable-query=false
 enable-rcon=false
-enable-command-block=true
+enable-command-block=<%= options['control_blocks'] == '1' || options['control_blocks'] == true  ? 'true' : 'false' %>
 gamemode=<%= options['game_mode'] || 0 %>
 generate-structures=true
 level-name=<%= level_name %>
@@ -13,12 +13,12 @@ max-build-height=256
 max-players=32
 motd=Minefold
 online-mode=true
-pvp=<%= options['pvp'] || 'true' %>
+pvp=<%= options['pvp'] == '1' || options['pvp'] == true  ? 'true' : 'false' %>
 server-ip=0.0.0.0
 server-port=<%= @port || 25565 %>
-spawn-animals=<%= options['spawn_animals'] || 'false' %>
-spawn-monsters=<%= options['spawn_monsters'] || 'false' %>
-spawn-npcs=true
+spawn-animals=<%= options['spawn_animals'] == '1' || options['spawn_animals'] == true  ? 'true' : 'false' %>
+spawn-monsters=<%= options['spawn_monsters'] == '1' || options['spawn_monsters'] == true  ? 'true' : 'false' %>
+spawn-npcs=<%= options['spawn_npcs'] == '1' || options['spawn_npcs'] == true  ? 'true' : 'false' %>
 texture-pack=
 view-distance=10
 white-list=true
