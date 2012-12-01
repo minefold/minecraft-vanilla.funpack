@@ -74,7 +74,7 @@ class LogTransformer
 
   def trigger(event, options = {})
     payload = {
-      ts: Time.now,
+      ts: Time.now.utc.iso8601,
       event: event,
       pid: @io.pid
     }.merge(options)
