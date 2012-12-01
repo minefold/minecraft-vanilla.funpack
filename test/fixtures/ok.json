@@ -18,8 +18,8 @@
         "spawn-monsters": true,
         "spawn-npcs": true,
 
-        "whitelist": "yarrcat",
-        "ops": "whatupdave\\nchrislloyd\\n",
+        "whitelist": "whatupdave\nyarrcat",
+        "ops": "whatupdave\nchrislloyd",
         "banned": "atnan"
     }
 }

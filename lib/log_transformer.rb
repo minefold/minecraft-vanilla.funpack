@@ -2,7 +2,7 @@ require 'json'
 
 class LogTransformer
 
-  GAME_MODS = %w(Survival Creative Adventure)
+  GAME_MODES = %w(Survival Creative Adventure)
   DIFFICULTIES = %w(Peaceful Easy Normal Hard)
 
   def initialize(io)
@@ -27,9 +27,11 @@ class LogTransformer
     # is needed.
     if @player_list_mode
       @players += line.split(',').map {|player| player.strip }
+      
+      puts "#{@players} #{@players_count}"
 
       if @players.size == @players_count
-        @players_list_mode = false
+        @player_list_mode = false
         trigger :players, players: @players, count: @players.count
       end
 
@@ -53,7 +55,7 @@ class LogTransformer
       trigger :chat, player: $1, msg: $2
 
     when line =~ /^There are (\d+)\/(\d+) players online:$/
-      @players_list_mode = true
+      @player_list_mode = true
       @players_count = $1.to_i
       @players = []
 
