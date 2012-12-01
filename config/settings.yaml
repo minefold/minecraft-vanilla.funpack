@@ -76,7 +76,7 @@
   label: Spawn animals
   default: true
 
-- name: spawn-monsers
+- name: spawn-monsters
   type: boolean
   label: Spawn monsters
   default: true
