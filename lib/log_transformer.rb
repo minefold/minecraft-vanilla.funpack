@@ -36,35 +36,35 @@ class LogTransformer
       return
     end
 
-    case line
-    when /^Done \(([\.0-9]+)s\)!/
+    case
+    when line =~ /^Done \(([\.0-9]+)s\)!/
       trigger :started, elapsed: ($1.to_f * 1000).to_i
 
-    when 'Stopping server'
+    when line.include?('Stopping server')
       trigger :stopping
 
-    when /^(\w+).*logged in with entity id/
+    when line =~ /^(\w+).*logged in with entity id/
       trigger :player_connected, username: $1
 
-    when /^(\w+) lost connection: (.*)$/
+    when line =~ /^(\w+) lost connection: (.*)$/
       trigger :player_disconnected, username: $1, reason: $2
 
-    when /^<(\w+)> (.+)$/
+    when line =~ /^<(\w+)> (.+)$/
       trigger :chat, player: $1, msg: $2
 
-    when /^There are (\d+)\/(\d+) players online:$/
+    when line =~ /^There are (\d+)\/(\d+) players online:$/
       @players_list_mode = true
       @players_count = $1.to_i
       @players = []
 
-    when /^\[(\w+)\: (.*)\]$/
+    when line =~ /^\[(\w+)\: (.*)\]$/
       actor = $1
       key, value = parse_settings($2)
       trigger :settings_changed, actor: actor, key: key, value: value
 
     when line.include?('FAILED TO BIND TO PORT!')
       trigger :fatal_error
-      Process.kill :TERM, io.pid
+      Process.kill :TERM, @io.pid
 
     else
       trigger :info, msg: line
