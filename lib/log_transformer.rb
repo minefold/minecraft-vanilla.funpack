@@ -25,52 +25,41 @@ class LogTransformer
 
     # Minecraft prints player lists across multiple lines so a seperate mode
     # is needed.
-    if @player_list_mode
-      @players += line.split(',').map {|player| player.strip }
-      
-      puts "#{@players} #{@players_count}"
+    unless collect_player_list(line)
+      case line
+      when /^Done \(([\.0-9]+)s\)!/
+        trigger :started, elapsed: ($1.to_f * 1000).to_i
 
-      if @players.size == @players_count
-        @player_list_mode = false
-        trigger :players, players: @players, count: @players.count
+      when /Stopping server/
+        trigger :stopping
+
+      when /^(\w+).*logged in with entity id/
+        trigger :player_connected, username: $1
+
+      when /^(\w+) lost connection: (.*)$/
+        trigger :player_disconnected, username: $1, reason: $2
+
+      when /^<(\w+)> (.+)$/
+        trigger :chat, username: $1, msg: $2
+
+      when /^There are (\d+)\/(\d+) players online:$/
+        @player_list_mode = true
+        @players_count = $1.to_i
+        @players = []
+
+      when /^\[(\w+)\: (.*)\]$/
+        actor = $1
+        key, value = parse_settings($2)
+        trigger :settings_changed, actor: actor, key: key, value: value
+
+      when /FAILED TO BIND TO PORT!/
+        trigger :fatal_error
+        Process.kill :TERM, @io.pid
+
+      else
+        trigger :info, msg: line
+
       end
-
-      return
-    end
-
-    case
-    when line =~ /^Done \(([\.0-9]+)s\)!/
-      trigger :started, elapsed: ($1.to_f * 1000).to_i
-
-    when line.include?('Stopping server')
-      trigger :stopping
-
-    when line =~ /^(\w+).*logged in with entity id/
-      trigger :player_connected, username: $1
-
-    when line =~ /^(\w+) lost connection: (.*)$/
-      trigger :player_disconnected, username: $1, reason: $2
-
-    when line =~ /^<(\w+)> (.+)$/
-      trigger :chat, player: $1, msg: $2
-
-    when line =~ /^There are (\d+)\/(\d+) players online:$/
-      @player_list_mode = true
-      @players_count = $1.to_i
-      @players = []
-
-    when line =~ /^\[(\w+)\: (.*)\]$/
-      actor = $1
-      key, value = parse_settings($2)
-      trigger :settings_changed, actor: actor, key: key, value: value
-
-    when line.include?('FAILED TO BIND TO PORT!')
-      trigger :fatal_error
-      Process.kill :TERM, @io.pid
-
-    else
-      trigger :info, msg: line
-
     end
   end
 
@@ -113,6 +102,18 @@ class LogTransformer
     when /Set game difficulty to (\w+)/
       [:difficulty, DIFFICULTIES.index($1)]
     end
+  end
+
+  def collect_player_list(line)
+    return false unless @player_list_mode
+
+    line_players = line.split(',').map(&:strip)
+    @players += line_players
+    if @players.size == @players_count || line_players.size == 0
+      trigger 'players_list', usernames: @players
+      @player_list_mode = false
+    end
+    true
   end
 
 end

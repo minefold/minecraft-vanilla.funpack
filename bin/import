@@ -1,0 +1,39 @@
+#!/usr/bin/env ruby
+
+# bin/import
+
+require 'find'
+require 'json'
+require 'bundler/setup'
+require 'nbtfile'
+
+def find_level_dats root
+  paths = []
+  Find.find(root) do |path|
+    if path =~ /\/level\.dat$/
+      paths << path
+    end
+  end
+  paths
+end
+
+level_dats = find_level_dats('.')
+
+raise "level.dat not found" unless level_dats.any?
+
+root = File.dirname(level_dats.first)
+
+Dir.chdir(root) do
+  level_dats = find_level_dats('.')
+  level_paths = level_dats.map{|p| File.dirname(p) }
+
+  nbt = NBTFile.read(File.open(level_dats.first))
+
+  puts JSON.dump(
+    root: root,
+    paths: level_paths,
+    settings: {
+      seed: nbt[1]['Data']['RandomSeed'].value.to_s
+    }
+  )
+end
