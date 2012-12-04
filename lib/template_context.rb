@@ -40,7 +40,7 @@ class TemplateContext
   end
 
   def enable_command_block
-    settings['enable-command-block'] || settings['enable-command-block'] || default('enable-command-block')
+    settings['enable-command-block'] || settings['enable_command_block'] || default('enable-command-block')
   end
 
   def gamemode
