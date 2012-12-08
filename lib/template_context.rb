@@ -14,7 +14,6 @@ class TemplateContext
     binding
   end
 
-
   def settings_config_path
     File.expand_path(File.join('..', '..', 'config', 'settings.yaml'), __FILE__)
   end
@@ -24,60 +23,20 @@ class TemplateContext
       .find {|s| s['name'] == name }['default']
   end
 
-  def allow_nether
-    settings['allow-nether'] ||
-    settings['allow_nether'] == '1' ||
-    settings['allow_nether'] == true ||
-    default('allow-nether')
+  def setting(name)
+    possible_keys = [name, name.gsub('-', '_')]
+    key = possible_keys.find{|key| settings.include?(key) }
+    settings[key] if key
   end
 
-  def allow_flight
-    settings['allow-flight'] || settings['allow_flight'] || default('allow-flight')
-  end
+  def bool(name)
+    value = setting(name)
 
-  def difficulty
-    settings['difficulty'] || default('difficulty')
+    if !value.nil?
+      ['1', 'true', true].include?(value)
+    else
+      default(name)
+    end
+    value
   end
-
-  def enable_command_block
-    settings['enable-command-block'] || settings['enable_command_block'] || default('enable-command-block')
-  end
-
-  def gamemode
-    settings['gamemode'] || settings['game_mode'] || default('gamemode')
-  end
-
-  def generate_structures
-    settings['generate-structures'] || settings['generate_structures'] || default('generate-structures')
-  end
-
-  def level_seed
-    settings['level-seed'] || settings['seed']
-  end
-
-  def level_type
-    settings['level-type'] || settings['level_type'] || default('level-type')
-  end
-
-  def pvp
-    settings['pvp'] == '1' || settings['pvp'] == true || default('pvp')
-  end
-
-  def spawn_animals
-    settings['spawn-animals'] || settings['spawn_animals'] == '1' || settings['spawn_animals'] == true || default('spawn-animals')
-  end
-
-  def spawn_monsters
-    settings['spawn-monsters'] || settings['spawn_monsters'] == '1' || settings['spawn_monsters'] == true || default('spawn-monsters')
-  end
-
-  def spawn_npcs
-    settings['spawn-npcs'] || settings['spawn_npcs'] == '1' || settings['spawn_npcs'] == true || default('spawn-npcs')
-  end
-
-  # TODO Validate that it's actually a remote URL
-  def texture_pack
-    settings['texture-pack']
-  end
-
 end
