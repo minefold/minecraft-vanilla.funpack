@@ -15,7 +15,7 @@
         "level-type": "LARGEBIOMES",
         "pvp": "0",
         "spawn_animals": "1",
-        "spawn_monsters": false,
+        "spawn_monsters": "0",
         "spawn_npcs": "false",
 
         "whitelist": "whatupdave\nyarrcat",

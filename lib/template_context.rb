@@ -37,6 +37,5 @@ class TemplateContext
     else
       default(name)
     end
-    value
   end
 end
