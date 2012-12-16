@@ -7,6 +7,14 @@ require 'json'
 require 'bundler/setup'
 require 'nbtfile'
 
+DEFAULT_PATHS = [
+  'banned-ips.txt',
+  'banned-players.txt',
+  'ops.txt',
+  'server.properties',
+  'white-list.txt',
+]
+
 def find_level_dats root
   paths = []
   Find.find(root) do |path|
@@ -19,19 +27,21 @@ end
 
 level_dats = find_level_dats('.')
 
-raise "level.dat not found" unless level_dats.any?
+abort JSON.dump(failed: "level.dat not found") unless level_dats.any?
 
-root = File.dirname(level_dats.first)
+# server root will be two dirs up from level dat
+root = File.dirname(File.dirname(level_dats.first))
 
 Dir.chdir(root) do
   level_dats = find_level_dats('.')
   level_paths = level_dats.map{|p| File.dirname(p) }
 
   nbt = NBTFile.read(File.open(level_dats.first))
+  extras = DEFAULT_PATHS.select{|p| File.exist?(p) }
 
   puts JSON.dump(
     root: root,
-    paths: level_paths,
+    paths: level_paths + extras,
     settings: {
       seed: nbt[1]['Data']['RandomSeed'].value.to_s
     }

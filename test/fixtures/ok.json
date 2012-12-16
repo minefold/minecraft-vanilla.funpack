@@ -8,7 +8,7 @@
         "allow-flight": "1",
         "allow-nether": "true",
         "difficulty": "1",
-        "enable-command-block": true,
+        "enable-command-block": "0",
         "gamemode": "1",
         "generate-structures": "0",
         "level-seed": 123456789,
