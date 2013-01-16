@@ -72,8 +72,7 @@
     {
       "name": "level-seed",
       "label": "Level seed",
-      "description": "Add a seed for your world, as in Singleplayer.
-Some examples are: minecraft, 404, 1a2b3c."
+      "description": "Add a seed for your world, as in Singleplayer. Some examples are: minecraft, 404, 1a2b3c."
     },
 
     {
@@ -94,7 +93,7 @@ Some examples are: minecraft, 404, 1a2b3c."
       "label": "Hardcore",
       "default": false,
       "description": "Players will be permanently banned if they die."
-    }
+    },
 
     {
       "name": "allow-flight",
