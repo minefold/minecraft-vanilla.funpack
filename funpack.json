@@ -117,13 +117,6 @@
     },
 
     {
-      "name": "pvp",
-      "type": "boolean",
-      "label": "PVP",
-      "default": true
-    },
-
-    {
       "name": "spawn-animals",
       "type": "boolean",
       "label": "Spawn animals",
