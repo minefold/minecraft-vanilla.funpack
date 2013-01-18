@@ -1,8 +1,9 @@
-require 'yaml'
+require 'json'
 
 class TemplateContext
 
-  attr_reader :level_name, :port, :settings
+  attr_reader :level_name
+  attr_reader :port
 
   def initialize(settings, level_name, port)
     @settings = settings
@@ -10,32 +11,24 @@ class TemplateContext
     @port = port || 25565
   end
 
-  def context
+  def binding
     binding
   end
 
-  def settings_config_path
-    File.expand_path(File.join('..', '..', 'config', 'settings.yaml'), __FILE__)
+  def schema_path
+    File.expand_path(File.join('..', '..', 'funpack.json'), __FILE__)
   end
 
-  def default(name)
-    YAML.load(File.read(settings_config_path))
-      .find {|s| s['name'] == name }['default']
+  def schema
+    JSON.load(schema_path)['settings']
   end
 
   def setting(name)
-    possible_keys = [name, name.gsub('-', '_')]
-    key = possible_keys.find{|key| settings.include?(key) }
-    settings[key] if key
+    @settings[name] || default(name)
   end
 
-  def bool(name)
-    value = setting(name)
-
-    if !value.nil?
-      ['1', 'true', true].include?(value)
-    else
-      default(name)
-    end
+  def default(field_name)
+    schema.find {|field| field['name'] == field_name }['default']
   end
+
 end

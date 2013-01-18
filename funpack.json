@@ -101,6 +101,20 @@
     },
 
     {
+      "name": "generate-structures",
+      "type": "boolean",
+      "label": "Generate structures",
+      "default": true
+    },
+
+    {
+      "name": "allow-nether",
+      "type": "boolean",
+      "label": "Allow nether",
+      "default": true
+    },
+
+    {
       "name": "enable-command-block",
       "type": "boolean",
       "label": "Enable command blocks",
