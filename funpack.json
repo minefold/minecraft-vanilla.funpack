@@ -4,18 +4,18 @@
       "name": "gamemode",
       "type": "integer",
       "label": "Game Mode",
-      "default": 0,
+      "default": "0",
       "values": [
         {
-          "value": 0,
+          "value": "0",
           "label": "Survival"
         },
         {
-          "value": 1,
+          "value": "1",
           "label": "Creative"
         },
         {
-          "value": 2,
+          "value": "2",
           "label": "Adventure"
         }
       ]
@@ -23,24 +23,23 @@
 
     {
       "name": "difficulty",
-      "type": "integer",
       "label": "Difficulty",
-      "default": 1,
+      "default": "1",
       "values": [
         {
-          "value": 0,
+          "value": "0",
           "label": "Peaceful"
         },
         {
-          "value": 1,
+          "value": "1",
           "label": "Easy"
         },
         {
-          "value": 2,
+          "value": "2",
           "label": "Normal"
         },
         {
-          "value": 3,
+          "value": "3",
           "label": "Hard"
         }
       ]
@@ -135,6 +134,16 @@
       "type": "boolean",
       "label": "Spawn NPCs",
       "default": true
+    },
+
+    {
+      "name": "whitelist",
+      "type": "text"
+    },
+
+    {
+      "name": "ops",
+      "type": "text"
     }
 
   ]
