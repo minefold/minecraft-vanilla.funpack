@@ -61,7 +61,7 @@ template = ERB.new(
 )
 
 File.open('server.properties', 'w') do |f|
-  f.puts template.result(t.binding)
+  f.puts template.result(context.binding)
 end
 
 

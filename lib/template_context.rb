@@ -12,7 +12,7 @@ class TemplateContext
   end
 
   def binding
-    binding
+    super
   end
 
   def schema_path
@@ -20,11 +20,11 @@ class TemplateContext
   end
 
   def schema
-    JSON.load(schema_path)['settings']
+    JSON.load(File.read(schema_path))['settings']
   end
 
   def setting(name)
-    @settings[name] || default(name)
+    @settings.has_key?(name) ? @settings[name] : default(name)
   end
 
   def default(field_name)
