@@ -2,7 +2,6 @@
   "settings": [
     {
       "name": "gamemode",
-      "type": "integer",
       "label": "Game Mode",
       "default": "0",
       "values": [
