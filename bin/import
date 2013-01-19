@@ -8,8 +8,6 @@ require 'bundler/setup'
 require 'nbtfile'
 
 DEFAULT_PATHS = [
-  'banned-ips.txt',
-  'banned-players.txt',
   'ops.txt',
   'server.properties',
   'white-list.txt',
