@@ -56,6 +56,10 @@ class LogTransformer
         trigger :fatal_error
         Process.kill :TERM, @io.pid
 
+      when /^java.lang.OutOfMemoryError: Java heap space$/
+        trigger :fatal_error, reason: 'out_of_memory'
+        Process.kill :TERM, @io.pid
+
       else
         trigger :info, msg: line
 
