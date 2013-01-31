@@ -34,13 +34,13 @@ class LogTransformer
         trigger :stopping
 
       when /^(\w+).*logged in with entity id/
-        trigger :player_connected, username: $1
+        trigger :player_connected, auth: 'mojang', uid: $1
 
       when /^(\w+) lost connection: (.*)$/
-        trigger :player_disconnected, username: $1, reason: $2
+        trigger :player_disconnected, auth: 'mojang', uid: $1, reason: $2
 
       when /^<(\w+)> (.+)$/
-        trigger :chat, username: $1, msg: $2
+        trigger :chat, nick: $1, msg: $2
 
       when /^There are (\d+)\/(\d+) players online:$/
         @player_list_mode = true
@@ -114,7 +114,7 @@ class LogTransformer
     line_players = line.split(',').map(&:strip)
     @players += line_players
     if @players.size == @players_count || line_players.size == 0
-      trigger 'players_list', usernames: @players
+      trigger 'players_list', auth: 'mojang', uids: @players
       @player_list_mode = false
     end
     true
