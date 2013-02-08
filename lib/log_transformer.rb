@@ -60,6 +60,10 @@ class LogTransformer
         trigger :fatal_error, reason: 'out_of_memory'
         Process.kill :TERM, @io.pid
 
+      when /^\[SEVERE\] This crash report has been saved to:/
+        trigger :fatal_error
+        Process.kill :TERM, @io.pid
+
       else
         trigger :info, msg: line
 
