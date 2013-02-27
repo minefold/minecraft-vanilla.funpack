@@ -46,8 +46,9 @@ class LogProcessor
 
     when /^\[(\w+)\: (.*)\]$/
       actor = $1
-      update = parse_settings($2).merge(actor: actor)
-      trigger :settings_changed, update
+      if update = parse_settings($2)
+        trigger :settings_changed, update.merge(actor: actor)
+      end
 
     when /FAILED TO BIND TO PORT!/
       trigger :fatal_error
