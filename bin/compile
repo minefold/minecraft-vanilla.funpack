@@ -1,0 +1,35 @@
+#!/bin/bash
+# usage: bin/compile <build-dir> <cache-dir>
+
+set -eo pipefail
+
+mkdir -p "$1" "$2"
+build=$(cd "$1/" && pwd)
+cache=$(cd "$2/" && pwd)
+funpack=$(cd $(dirname $0)/.. && pwd)
+
+# minecraft
+mc_ver="1.4.7"
+mc_url="https://s3.amazonaws.com/MinecraftDownload/launcher/minecraft_server.jar"
+if test -d $cache/mc-$mc_ver
+then
+  echo "-----> Using Minecraft $mc_ver"
+else
+  mkdir -p $cache/mc-$mc_ver
+  cd $cache/mc-$mc_ver
+  echo -n "-----> Installing Minecraft $mc_ver"
+  curl --silent -Lo minecraft.jar $mc_url
+  echo " done"
+fi
+cp $cache/mc-$mc_ver/minecraft.jar $build
+
+cd $funpack
+mkdir -p $build/bin
+cp bin/run $build/bin
+cp bin/import $build/bin
+
+cp -R lib $build
+cp -R templates $build
+cp Gemfile $build
+cp Gemfile.lock $build
+cp funpack.json $build

@@ -1,38 +1,81 @@
 #!/usr/bin/env ruby
-require 'time'
+
+# encoding: UTF-8
+
+$:.unshift File.expand_path('../../lib', __FILE__)
+
+require 'bundler/setup'
+
+require 'bash'
 require 'json'
+require 'log_processor'
+require 'craftbelt/minecraft_instance'
+require 'open3'
+require 'settings'
+require 'time'
 
-$LOAD_PATH << File.expand_path('../../lib', __FILE__)
-
-require 'log_transformer'
-
-
-# ---
-
+include Bash
 
 STDOUT.sync = true
 STDIN.sync = true
 
-# usage: ./run <config>
+data_file = File.expand_path(ENV['DATAFILE'])
+$build = File.expand_path('../..', __FILE__)
 
-config_path = ARGV.first
-root = File.expand_path('../..', __FILE__)
+# setup working directory
+bash <<-EOS
+  cp -f #{$build}/minecraft.jar .
+EOS
 
-# TODO This is a hack while Pinky doesn't support preparing funpacks.
-system(File.join(root, 'bin', 'prepare'), config_path)
+data = JSON.parse(File.read(data_file), symbolize_names: true)
+minecraft = Craftbelt::MinecraftInstance.new('.')
 
-config = JSON.parse(File.read(config_path))
+schema = JSON.parse(File.read("#{$build}/funpack.json"))['schema']
+s = Settings.new(schema, data[:settings].merge(
+    "name" => data[:name],
+    "level-name" => (minecraft.level_paths.first || 'level')
+  )
+)
+{
+  "server.properties.erb" => 'server.properties',
+}.each do |src, dest|
+  `mkdir -p #{File.dirname(dest)}`
+  File.write(dest, s.erb(File.read("#{$build}/templates/#{src}")))
+end
 
-ram_min = config['ram']['min']
-ram_max = config['ram']['max']
+def player_list(player_setting)
+  # TODO remove this if when players are passed as an array
+  if player_setting.is_a? Array
+    player_setting.join("\n")
+  else
+    player_setting
+  end
+end
 
-cmd = [ "java",
-        "-Xms#{ram_min}M",
-        "-Xmx#{ram_max}M",
-        "-jar", "server.jar",
-        "nogui",
-        err: [:child, :out]]
+File.write('ops.txt', player_list(data[:settings][:ops]))
+File.write('white-list.txt', player_list(data[:settings][:whitelist]))
 
-IO.popen(cmd) do |io|
-  LogTransformer.new(io).process!
+ram_max = (ENV['RAM'] || 1024).to_i
+ram_min = ram_max
+
+Open3.popen3("java",
+            "-Xms#{ram_min}M", "-Xmx#{ram_max}M",
+            "-jar", "minecraft.jar",
+            "nogui") do |stdin, stdout, stderr, wait_thr|
+
+  processor = LogProcessor.new(wait_thr.pid)
+
+  begin
+    Thread.new do
+      while true
+        stdin.puts STDIN.readline.strip
+      end
+    end
+
+    while true
+      processor.process_line stderr.readline
+    end
+  rescue EOFError
+  end
+  exit_status = wait_thr.value
 end

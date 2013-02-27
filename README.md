@@ -1,11 +1,3 @@
-# Minecraft vanilla
+# Minecraft Funpack
 
-## Settings
-
-The following settings can be changed in game:
-
-* whitelist
-* blacklist
-* ops
-* difficulty
-* game_mode
+This is a [Minefold](https://minefold.com) funpack for the vanilla version of Minecraft
