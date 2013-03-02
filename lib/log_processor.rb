@@ -3,9 +3,10 @@
 require 'json'
 
 class LogProcessor
-  def initialize(pid)
+  def initialize(pid, schema)
     @pid = pid
     @mode = :normal
+    @schema = schema
   end
 
   def process_line(line)
@@ -111,10 +112,16 @@ class LogProcessor
       { remove: 'ops', value: $1 }
 
     when /default game mode is now (\w+)/
-      { set: 'gamemode', value: GAME_MODES.index($1) }
+      field = @schema.fields.find{|f| f.name == :gamemode }
+      value = field.values.find{|v| v['label'].downcase == $1.strip.downcase }
+      
+      { set: 'gamemode', value: value['value'] }
 
     when /Set game difficulty to (\w+)/
-      { set: 'difficulty', value: DIFFICULTIES.index($1) }
+      field = @schema.fields.find{|f| f.name == :difficulty }
+      value = field.values.find{|v| v['label'].downcase == $1.strip.downcase }
+      
+      { set: 'difficulty', value: value['value'] }
     end
   end
 end
