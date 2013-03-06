@@ -19,7 +19,6 @@ include Bash
 STDOUT.sync = true
 STDIN.sync = true
 
-data_file = File.expand_path(ENV['DATAFILE'])
 $build = File.expand_path('../..', __FILE__)
 
 # setup working directory
@@ -27,7 +26,13 @@ bash <<-EOS
   cp -f #{$build}/minecraft.jar .
 EOS
 
-data = JSON.parse(File.read(data_file), symbolize_names: true)
+data_text = ENV['DATA']
+if !data_text
+  data_file = File.expand_path(ENV['DATAFILE'])
+  data_text = File.read(data_file)
+end
+
+data = JSON.parse(data_text, symbolize_names: true)
 minecraft = Craftbelt::MinecraftInstance.new('.')
 
 schema = JSON.parse(File.read("#{$build}/funpack.json"))['schema']

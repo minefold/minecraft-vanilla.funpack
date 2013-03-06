@@ -1,3 +1,5 @@
+require 'json'
+
 task :default => :start
 
 $build_dir = File.expand_path("~/funpacks/minecraft/build")
@@ -10,26 +12,24 @@ task :start do
     mkdir -p #{$working_dir}
   }
 
-  File.write "#{$working_dir}/data.json", <<-EOS
-    {
-      "name": "Woodbury",
-      "settings": {
-        "blacklist": "atnan",
-        "gamemode": 2,
-        "ops": "whatupdave\\nchrislloyd",
-        "seed": "s33d",
-        "allow-nether": true,
-        "allow-flight": false,
-        "spawn-animals": true,
-        "spawn-monsters": false,
-        "spawn-npcs": false,
-        "whitelist": "whatupdave\\nchrislloyd"
-      }
+  data = {
+    name: "Woodbury",
+    settings: {
+      'blacklist' => "atnan",
+      'gamemode' => 2,
+      'ops' => "whatupdave\nchrislloyd",
+      'level-seed' => "s33d",
+      'allow-nether' => true,
+      'allow-flight' => false,
+      'spawn-animals' => true,
+      'spawn-monsters' => false,
+      'spawn-npcs' => false,
+      'whitelist' => "whatupdave\nchrislloyd"
     }
-  EOS
+  }
 
   Dir.chdir($working_dir) do
-    raise "error" unless system "PORT=4032 RAM=638 DATAFILE=#{$working_dir}/data.json #{$build_dir}/bin/run 2>&1"
+    raise "error" unless system "PORT=4032 RAM=638 DATA=#{data.to_json.to_json} #{$build_dir}/bin/run 2>&1"
   end
 end
 
