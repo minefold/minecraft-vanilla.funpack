@@ -1,19 +1,15 @@
 {
-  "schema": [
-    {
+  "schema": [{
       "name": "gamemode",
       "label": "Game Mode",
       "default": "0",
-      "values": [
-        {
+      "values": [{
           "value": "0",
           "label": "Survival"
-        },
-        {
+        }, {
           "value": "1",
           "label": "Creative"
-        },
-        {
+        }, {
           "value": "2",
           "label": "Adventure"
         }
@@ -24,20 +20,16 @@
       "name": "difficulty",
       "label": "Difficulty",
       "default": "1",
-      "values": [
-        {
+      "values": [{
           "value": "0",
           "label": "Peaceful"
-        },
-        {
+        }, {
           "value": "1",
           "label": "Easy"
-        },
-        {
+        }, {
           "value": "2",
           "label": "Normal"
-        },
-        {
+        }, {
           "value": "3",
           "label": "Hard"
         }
@@ -48,18 +40,15 @@
       "name": "level-type",
       "label": "Level type",
       "default": "DEFAULT",
-      "values": [
-        {
+      "values": [{
           "value": "DEFAULT",
           "label": "Default",
           "description": "Standard world with hills, valleys, water, etc."
-        },
-        {
+        }, {
           "value": "FLAT",
           "label": "Flat",
           "description": "A flat world with no features, meant for building."
-        },
-        {
+        }, {
           "value": "LARGEBIOMES",
           "label": "Large biomes",
           "description": "Same as default but all biomes are larger."
@@ -148,6 +137,11 @@
       "label": "Spawn NPCs",
       "default": true
     },
+    
+    {
+      "name": "ops",
+      "type": "text"
+    },
 
     {
       "name": "whitelist",
@@ -155,9 +149,8 @@
     },
 
     {
-      "name": "ops",
+      "name": "blacklist",
       "type": "text"
     }
-
   ]
 }

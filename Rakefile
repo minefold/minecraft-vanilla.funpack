@@ -4,32 +4,30 @@ task :default => :start
 
 $build_dir = File.expand_path("~/funpacks/minecraft/build")
 $cache_dir = File.expand_path("~/funpacks/minecraft/cache")
-$working_dir = File.expand_path("~/funpacks/minecraft/working")
+$working_dir = File.expand_path(ENV['WORKING'] || "~/funpacks/minecraft/working")
 
 task :start do
   system %Q{
-    rm -rf #{$working_dir}
     mkdir -p #{$working_dir}
   }
 
   data = {
     name: "Woodbury",
     settings: {
-      'blacklist' => "atnan",
       'gamemode' => 2,
-      'ops' => "whatupdave\nchrislloyd",
+      'ops' => "chrislloyd",
+      'whitelist' => "whatupdave\r\natnan",
       'level-seed' => "s33d",
       'allow-nether' => true,
       'allow-flight' => false,
       'spawn-animals' => true,
       'spawn-monsters' => false,
       'spawn-npcs' => false,
-      'whitelist' => "whatupdave\nchrislloyd"
     }
   }
 
   Dir.chdir($working_dir) do
-    raise "error" unless system "PORT=4032 RAM=638 DATA=#{data.to_json.to_json} #{$build_dir}/bin/run 2>&1"
+    raise "error" unless system "BUNDLE_GEMFILE=#{$build_dir}/Gemfile PORT=4032 RAM=638 DATA=#{data.to_json.to_json} #{$build_dir}/bin/run 2>&1"
   end
 end
 
