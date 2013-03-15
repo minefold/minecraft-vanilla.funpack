@@ -15,7 +15,7 @@ task :start do
     name: "Woodbury",
     settings: {
       'gamemode' => 2,
-      'ops' => "chrislloyd",
+      'ops' => "whatupdave\r\nchrislloyd",
       'whitelist' => "whatupdave\r\natnan",
       'level-seed' => "s33d",
       'allow-nether' => true,

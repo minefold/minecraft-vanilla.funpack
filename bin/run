@@ -17,6 +17,7 @@ include Bash
 
 STDOUT.sync = true
 STDIN.sync = true
+Thread.abort_on_exception = true
 
 $build = File.expand_path('../..', __FILE__)
 
@@ -36,7 +37,7 @@ Open3.popen3("java",
             "-jar", "minecraft.jar",
             "nogui") do |stdin, stdout, stderr, wait_thr|
 
-  processor = LogProcessor.new(wait_thr.pid, env.schema)
+  processor = LogProcessor.new(wait_thr.pid, env.settings.schema)
 
   begin
     Thread.new do
@@ -46,7 +47,17 @@ Open3.popen3("java",
     end
 
     while true
-      processor.process_line stderr.readline
+      line = stderr.readline
+      begin
+        processor.process_line line
+      rescue => e
+        puts JSON.dump(
+          ts: Time.now.utc.iso8601,
+          event: "failed to process line",
+          error: e,
+          line: line
+        )
+      end
     end
   rescue EOFError
   end
