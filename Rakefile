@@ -23,6 +23,7 @@ task :start do
       'spawn-animals' => true,
       'spawn-monsters' => false,
       'spawn-npcs' => false,
+      'max-players' => 10
     }
   }
 
