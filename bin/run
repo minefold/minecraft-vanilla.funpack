@@ -21,20 +21,26 @@ Thread.abort_on_exception = true
 
 $build = File.expand_path('../..', __FILE__)
 
-# setup working directory
-bash <<-EOS
-  cp -f #{$build}/minecraft.jar .
-EOS
-
 env = Craftbelt::Env.new('.', $build)
 env.write_player_files
 env.write_templates(
   'server.properties.erb' => 'server.properties'
 )
 
+jar = "minecraft.jar"
+snapshot = env.settings.field(:snapshot) rescue nil
+if snapshot
+  jar = "minecraft.#{snapshot}.jar"
+end
+
+# setup working directory
+bash <<-EOS
+  cp -f #{$build}/#{jar} .
+EOS
+
 Open3.popen3("java",
             "-Xms#{env.ram}M", "-Xmx#{env.ram}M",
-            "-jar", "minecraft.jar",
+            "-jar", jar,
             "nogui") do |stdin, stdout, stderr, wait_thr|
 
   processor = LogProcessor.new(wait_thr.pid, env.settings.schema)
