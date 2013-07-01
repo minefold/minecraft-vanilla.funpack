@@ -15,6 +15,7 @@ task :start do
     name: "Woodbury",
     settings: {
       'gamemode' => 2,
+      # 'snapshot' => '13w16a',
       'ops' => "whatupdave\r\nchrislloyd",
       'whitelist' => "whatupdave\r\natnan",
       'level-seed' => "s33d",

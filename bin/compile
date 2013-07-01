@@ -8,21 +8,20 @@ build=$(cd "$1/" && pwd)
 cache=$(cd "$2/" && pwd)
 funpack=$(cd $(dirname $0)/.. && pwd)
 
-# minecraft
-ver="1.5.1"
-url="https://s3.amazonaws.com/MinecraftDownload/launcher/minecraft_server.jar"
-if test -d $cache/mc-$ver
-then
-  echo "-----> Using Minecraft $ver"
-else
-  rm -rf $cache
-  mkdir -p $cache/mc-$ver
-  cd $cache/mc-$ver
-  echo -n "-----> Installing Minecraft $ver"
-  curl --silent -Lo minecraft.jar $url
-  echo " done"
-fi
-cp $cache/mc-$ver/minecraft.jar $build
+for ver in 1.6.1; do
+  url=http://s3.amazonaws.com/Minecraft.Download/versions/$ver/minecraft_server.$ver.jar
+  if test -d $cache/mc-$ver
+  then
+    echo "-----> Using Minecraft $ver"
+  else
+    mkdir -p $cache/mc-$ver
+    cd $cache/mc-$ver
+    echo -n "-----> Installing Minecraft $ver"
+    curl --silent -Lo minecraft.$ver.jar $url
+    echo " done"
+  fi
+  cp $cache/mc-$ver/minecraft.$ver.jar $build
+done
 
 cd $funpack
 mkdir -p $build/bin
