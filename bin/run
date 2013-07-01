@@ -28,9 +28,7 @@ env.write_templates(
 )
 
 snapshot = env.settings.field(:snapshot) rescue '1.6.1'
-if snapshot
-  jar = "minecraft.#{snapshot}.jar"
-end
+jar = "minecraft.#{snapshot}.jar"
 
 # setup working directory
 bash <<-EOS
