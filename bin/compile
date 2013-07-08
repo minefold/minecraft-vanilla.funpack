@@ -8,7 +8,7 @@ build=$(cd "$1/" && pwd)
 cache=$(cd "$2/" && pwd)
 funpack=$(cd $(dirname $0)/.. && pwd)
 
-for ver in 1.6.1; do
+for ver in 1.6.2; do
   url=http://s3.amazonaws.com/Minecraft.Download/versions/$ver/minecraft_server.$ver.jar
   if test -d $cache/mc-$ver
   then

@@ -27,7 +27,7 @@ env.write_templates(
   'server.properties.erb' => 'server.properties'
 )
 
-snapshot = env.settings.field(:snapshot) rescue '1.6.1'
+snapshot = env.settings.field(:snapshot) rescue '1.6.2'
 jar = "minecraft.#{snapshot}.jar"
 
 # setup working directory
